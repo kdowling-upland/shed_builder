@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import {} from 'react';
 import * as THREE from 'three';
 import type { Opening, WallId } from '../../types/shed.ts';
 
@@ -126,7 +126,7 @@ function DoorPanel({ w, h, mirror = false }: { w: number; h: number; mirror?: bo
       ))}
       {/* Door handle */}
       <mesh position={[handleX, 0, -(DOOR_DEPTH + 0.05)]}>
-        <cylinderGeometry args={[0.04, 0.04, 0.12, 12]} rotation={[Math.PI / 2, 0, 0]} />
+        <cylinderGeometry args={[0.04, 0.04, 0.12, 12]} />
         <meshStandardMaterial color="#333" roughness={0.3} metalness={0.8} />
       </mesh>
     </group>

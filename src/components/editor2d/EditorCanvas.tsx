@@ -11,7 +11,6 @@ const WALL_COLOR = '#8a9ab0';
 const GRID_MAJOR = '#1a1e27';
 const GRID_MINOR = '#12151b';
 const LABEL_COLOR = '#5a6478';
-const DIM_COLOR = '#4a5568';
 
 export function EditorCanvas() {
   const design = useShedStore((s) => s.design);

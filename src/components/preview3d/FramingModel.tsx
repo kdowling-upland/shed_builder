@@ -89,8 +89,6 @@ export function FramingModel({ wall, widthFt, lengthFt, heightFt, openings, fram
     for (const op of wallOpenings) {
       const ox = op.position / 12;
       const ow = op.width / 12;
-      const oh = op.height / 12;
-      const oy = op.type === 'window' ? 3 : 0;
 
       // King studs at opening edges
       result.push({ x: ox, y: plateHeight + studHeight / 2, h: studHeight });
