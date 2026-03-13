@@ -1,0 +1,1 @@
+& "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe" -d . cmd /k claude `; sp -H -d . cmd /k claude `; mf left `; sp -V -d . cmd /k claude `; mf right `; sp -V -d . cmd /k claude
