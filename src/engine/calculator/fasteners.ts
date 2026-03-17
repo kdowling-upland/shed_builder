@@ -3,7 +3,7 @@ import type { MaterialItem } from '../../types/materials.ts';
 import { usePriceStore } from '../../store/usePriceStore.ts';
 
 export function calculateFasteners(design: ShedDesign): MaterialItem[] {
-  const { width, length, wallHeight, framing, openings } = design;
+  const { width, length, wallHeight, framing } = design;
   const items: MaterialItem[] = [];
 
   // Floor joist hangers
