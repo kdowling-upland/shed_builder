@@ -33,8 +33,9 @@ export function DimensionsPanel() {
         max={DIMENSION_LIMITS.wallHeight.max}
         unit="ft"
       />
-      <div className="text-[11px] text-gray-500 pt-1 font-medium tabular-nums">
-        {design.width}' x {design.length}' = {design.width * design.length} sq ft
+      <div className="text-[10px] text-text-muted tabular-nums pt-1 mt-0.5 border-t border-border-subtle/50 flex items-center gap-3">
+        <span className="w-[80px] shrink-0">Area</span>
+        <span className="text-text-secondary">{design.width} x {design.length} = {design.width * design.length} sq ft</span>
       </div>
     </PanelSection>
   );

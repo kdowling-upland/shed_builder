@@ -16,16 +16,17 @@ export function radiansFromPitch(pitch: number): number {
 
 /**
  * Derive gambrel slope angles from the user's roof pitch.
- * The pitch controls the upper (shallower) slope; the lower slope is its
- * complement, capped at 60° to prevent extreme geometry at low pitch values.
- * 60° is the most common lower-slope angle in real gambrel construction.
+ * Both slopes scale with pitch so the full gambrel shape responds to changes.
+ * The lower slope receives 75% of the total rise and the upper slope 25%,
+ * producing the characteristic steep-lower / shallow-upper barn profile.
+ * The total peak height matches an equivalent gable at the same pitch.
  *
  * Returns { lowerRad, upperRad } — angles from horizontal in radians.
  */
 export function gambrelAngles(pitch: number): { lowerRad: number; upperRad: number } {
-  const upperRad = Math.atan(pitch / 12);
-  // Lower slope is the complement, but capped at 60° (π/3) so that low-pitch
-  // values don't produce near-vertical slopes with enormous tan() values.
-  const lowerRad = Math.min(Math.PI / 2 - upperRad, Math.PI / 3);
+  // With quarter-width runs and a 75/25 rise split the width cancels out:
+  //   lowerRad = atan(pitch / 8),  upperRad = atan(pitch / 24)
+  const lowerRad = Math.atan(pitch / 8);
+  const upperRad = Math.atan(pitch / 24);
   return { lowerRad, upperRad };
 }

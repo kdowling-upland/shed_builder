@@ -18,23 +18,23 @@ interface FramingRowProps {
 
 function FramingRow({ label, size, onSizeChange, sizeOptions, spacing, onSpacingChange }: FramingRowProps) {
   return (
-    <div className="space-y-1.5">
-      <span className="text-[13px] text-gray-300 font-medium">{label}</span>
-      <div className="flex items-center gap-2">
+    <div className="property-row">
+      <span className="text-[11px] text-text-secondary font-medium">{label}</span>
+      <div className="flex-1 min-w-0 flex items-center gap-2">
         <select
           value={size}
           onChange={(e) => onSizeChange(e.target.value)}
-          className="flex-1 bg-surface-input text-gray-100 px-2.5 py-1.5 rounded-md border border-border-subtle text-sm font-body focus:border-amber-warm/50 focus:outline-none transition-colors"
+          className="flex-1 bg-surface-input text-text-primary px-2 py-1 rounded-sm border border-border-subtle text-[11px] font-body focus:border-accent focus:outline-none transition-colors"
         >
           {sizeOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
-        <span className="text-xs text-gray-600 font-medium">@</span>
+        <span className="text-[10px] text-text-muted">@</span>
         <select
           value={String(spacing)}
           onChange={(e) => onSpacingChange(Number(e.target.value))}
-          className="bg-surface-input text-gray-100 px-2.5 py-1.5 rounded-md border border-border-subtle text-sm font-body focus:border-amber-warm/50 focus:outline-none transition-colors"
+          className="bg-surface-input text-text-primary px-2 py-1 rounded-sm border border-border-subtle text-[11px] font-body focus:border-accent focus:outline-none transition-colors"
         >
           {spacingOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label} O.C.</option>

@@ -125,7 +125,7 @@ function getFoundationInstructions(design: ShedDesign): string {
 function getRoofFramingInstructions(design: ShedDesign): string {
   const pitch = design.roof.pitch;
   const overhang = design.roof.overhang;
-  const plumbDeg = parseFloat((Math.atan2(12, pitch) * (180 / Math.PI)).toFixed(1));
+  const plumbDeg = parseFloat((Math.atan2(pitch, 12) * (180 / Math.PI)).toFixed(1));
   const seatDeg = parseFloat((90 - plumbDeg).toFixed(1));
 
   const birdsMouthNote = `Cut the bird's mouth where each rafter sits on the wall plate: make a ${seatDeg}° seat cut (horizontal) and a plumb notch, cutting no deeper than 2/3 the rafter width.`;
@@ -148,7 +148,7 @@ function getRoofFramingInstructions(design: ShedDesign): string {
     }
     case 'hip': {
       const effectivePitch = pitch / Math.SQRT2;
-      const hipPlumbDeg = parseFloat((Math.atan2(12, effectivePitch) * (180 / Math.PI)).toFixed(1));
+      const hipPlumbDeg = parseFloat((Math.atan2(effectivePitch, 12) * (180 / Math.PI)).toFixed(1));
       return `Install the ridge board (shorter than building length by ${design.width}'). Cut common rafters with a ${plumbDeg}° plumb cut at the ridge and a bird's mouth at the plate (${seatDeg}° seat cut, 2/3 depth).${tailNote} Install common rafters on the long sides at ${design.framing.rafterSpacing}" on center. For the 4 hip rafters, make compound cuts: ${hipPlumbDeg}° plumb with a 45° cheek angle at both ends. Cut jack rafters with the same plumb and bird's mouth as commons, plus a 45° cheek cut where they meet the hip rafter. Fill in jack rafters on the hip sections at ${design.framing.rafterSpacing}" on center. Attach all rafters with hurricane ties.`;
     }
   }

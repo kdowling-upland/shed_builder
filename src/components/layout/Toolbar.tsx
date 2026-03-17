@@ -81,144 +81,151 @@ export function Toolbar() {
   }, [design]);
 
   return (
-    <header className="bg-surface-panel border-b border-border-subtle px-5 py-2.5 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-md bg-amber-warm/15 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-amber-warm">
-              <path d="M2 14V6l6-4 6 4v8H2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-              <path d="M6 14v-4h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-              <path d="M2 6l6-4 6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h1 className="text-base font-display text-amber-warm tracking-wide">Shed Builder</h1>
+    <header className="bg-surface-elevated border-b border-border-subtle px-5 py-2 flex items-center justify-between shrink-0">
+      {/* Left group: logo + name */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="text-text-secondary">
+            <path d="M2 14V6l6-4 6 4v8H2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            <path d="M6 14v-4h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-xs font-semibold text-text-primary tracking-wide">Shed Builder</span>
         </div>
-        <div className="w-px h-5 bg-border-subtle" />
+        <div className="w-px h-4 bg-border-medium/40" />
         <input
           type="text"
           value={design.name}
           onChange={(e) => setName(e.target.value)}
-          className="bg-surface-input text-gray-200 px-3 py-1.5 rounded-md border border-border-subtle text-sm w-40 font-body focus:border-amber-warm/50 focus:outline-none transition-colors placeholder:text-gray-600"
+          className="bg-surface-input text-text-primary px-2 py-0.5 rounded-sm border border-border-subtle text-xs w-36 font-body focus:border-accent focus:outline-none transition-colors"
         />
       </div>
 
+      {/* Center: view toggle */}
       <ViewToggle />
 
-      <div className="flex items-center gap-2">
-        <div className="flex items-center bg-surface-input rounded-md border border-border-subtle">
+      {/* Right group: actions */}
+      <div className="flex items-center gap-2.5">
+        {/* Undo / Redo */}
+        <div className="flex items-center rounded-sm overflow-hidden border border-border-medium">
           <button
             onClick={undo}
             disabled={!canUndo}
-            className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-r border-border-subtle"
-            title="Undo"
+            className="px-3.5 py-2.5 bg-surface-panel text-text-secondary hover:text-text-primary hover:bg-surface-elevated disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+            title="Undo (Ctrl+Z)"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 7v6h6"/><path d="M3 13a9 9 0 0 1 15.36-6.36L21 9"/>
             </svg>
           </button>
+          <div className="w-px self-stretch bg-border-medium" />
           <button
             onClick={redo}
             disabled={!canRedo}
-            className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            title="Redo"
+            className="px-3.5 py-2.5 bg-surface-panel text-text-secondary hover:text-text-primary hover:bg-surface-elevated disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+            title="Redo (Ctrl+Y)"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 7v6h-6"/><path d="M21 13a9 9 0 0 0-15.36-6.36L3 9"/>
             </svg>
           </button>
         </div>
 
+        <div className="w-px h-6 bg-border-medium/40" />
+
+        {/* Edit Prices */}
         <button
           onClick={() => useUIStore.getState().setPricingModalOpen(true)}
-          className="px-3.5 py-1.5 text-sm text-gray-300 rounded-md hover:text-gray-100 hover:bg-surface-elevated border border-border-subtle transition-colors font-medium flex items-center gap-1.5"
+          className="px-4 py-2.5 text-[11px] text-text-secondary rounded-sm hover:text-text-primary bg-surface-panel hover:bg-surface-elevated border border-border-medium transition-colors font-medium flex items-center gap-1.5"
+          title="Edit Material Prices"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          Edit Prices
+          Prices
         </button>
 
+        {/* Save / Load */}
         <div className="relative">
           <button
             onClick={() => setShowSaveLoad(!showSaveLoad)}
-            className="px-3.5 py-1.5 text-sm text-gray-300 rounded-md hover:text-gray-100 hover:bg-surface-elevated border border-border-subtle transition-colors font-medium flex items-center gap-1.5"
+            className="px-4 py-2.5 text-[11px] text-text-secondary rounded-sm hover:text-text-primary bg-surface-panel hover:bg-surface-elevated border border-border-medium transition-colors font-medium flex items-center gap-1.5"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
             </svg>
             Save / Load
           </button>
           {showSaveLoad && (
-            <div className="absolute right-0 top-full mt-2 bg-surface-elevated border border-border-medium rounded-lg shadow-2xl shadow-black/50 p-4 w-64 z-50">
+            <div className="absolute right-0 top-full mt-2 bg-surface-elevated border border-border-medium rounded-sm shadow-xl shadow-black/50 p-3 w-56 z-50">
               <button
                 onClick={handleSave}
-                className="w-full mb-3 px-3 py-2 bg-amber-warm/90 text-gray-950 rounded-md hover:bg-amber-glow text-sm font-semibold transition-colors"
+                className="w-full mb-2.5 px-3 py-2 bg-accent text-white rounded-sm hover:bg-accent-hover text-xs font-semibold transition-colors"
               >
                 Save &ldquo;{design.name}&rdquo;
               </button>
               {designNames.length > 0 && (
                 <>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-2 font-semibold">Saved Designs</div>
+                  <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2 font-semibold">Saved Designs</div>
                   {designNames.map((name) => (
                     <div key={name} className="flex items-center justify-between py-1.5 border-b border-border-subtle last:border-0">
                       <button
                         onClick={() => handleLoad(name)}
-                        className="text-sm text-gray-300 hover:text-amber-warm truncate flex-1 text-left transition-colors"
+                        className="text-xs text-text-secondary hover:text-text-primary truncate flex-1 text-left transition-colors"
                       >
                         {name}
                       </button>
                       <button
                         onClick={() => deleteDesign(name)}
-                        className="text-xs text-red-400/60 hover:text-red-400 ml-2 transition-colors"
+                        className="text-[10px] text-red-400/50 hover:text-red-400 ml-3 transition-colors"
                       >
-                        Delete
+                        Del
                       </button>
                     </div>
                   ))}
                 </>
               )}
               {designNames.length === 0 && (
-                <p className="text-xs text-gray-600">No saved designs</p>
+                <p className="text-[10px] text-text-muted">No saved designs</p>
               )}
             </div>
           )}
         </div>
 
+        <div className="w-px h-6 bg-border-medium/40" />
+
+        {/* Export */}
         <div className="relative" ref={exportMenuRef}>
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
             disabled={exporting}
-            className="px-4 py-1.5 text-sm bg-amber-warm text-gray-950 rounded-md hover:bg-amber-glow font-semibold disabled:opacity-60 flex items-center gap-1.5 transition-colors"
+            className="px-5 py-2.5 text-[11px] bg-accent text-white rounded-sm hover:bg-accent-hover font-semibold disabled:opacity-50 flex items-center gap-1.5 transition-colors border border-accent-hover/50"
           >
             {exporting ? (
               <>
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Generating...
+                Exporting...
               </>
             ) : (
               <>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
                 Export
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" className="shrink-0 -ml-0.5"><path d="M2 4l3 3 3-3" /></svg>
+                <svg width="8" height="8" viewBox="0 0 10 10" fill="currentColor"><path d="M2 4l3 3 3-3" /></svg>
               </>
             )}
           </button>
           {showExportMenu && (
-            <div className="absolute right-0 top-full mt-2 bg-surface-elevated border border-border-medium rounded-lg shadow-2xl shadow-black/50 py-1 w-40 z-50">
+            <div className="absolute right-0 top-full mt-2 bg-surface-elevated border border-border-medium rounded-sm shadow-xl shadow-black/50 py-1 w-36 z-50">
               <button
                 onClick={handleExportPDF}
-                className="w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-surface-input text-left transition-colors"
+                className="w-full px-3.5 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-accent-muted text-left transition-colors"
               >
-                PDF
+                PDF Document
               </button>
               <button
                 onClick={handleExportMarkdown}
-                className="w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-surface-input text-left transition-colors"
+                className="w-full px-3.5 py-2 text-xs text-text-secondary hover:text-text-primary hover:bg-accent-muted text-left transition-colors"
               >
                 Markdown
               </button>

@@ -1,16 +1,23 @@
 @import "tailwindcss";
 
-@theme {
-  --font-display: 'Instrument Serif', serif;
-  --font-body: 'DM Sans', sans-serif;
+@theme inline {
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --color-accent: #3a72b0;
+  --color-accent-hover: #4a8ad0;
+  --color-accent-muted: rgba(58, 114, 176, 0.15);
+  --color-surface-dark: #1e1e1e;
+  --color-surface-panel: #303030;
+  --color-surface-input: #222222;
+  --color-surface-elevated: #3c3c3c;
+  --color-surface-header: #383838;
+  --color-border-subtle: #1a1a1a;
+  --color-border-medium: #4a4a4a;
+  --color-text-primary: #c8c8c8;
+  --color-text-secondary: #888888;
+  --color-text-muted: #606060;
   --color-amber-warm: #d4a254;
   --color-amber-glow: #e8b560;
-  --color-surface-dark: #0c0e12;
-  --color-surface-panel: #13161c;
-  --color-surface-input: #0a0c10;
-  --color-surface-elevated: #1a1e27;
-  --color-border-subtle: #2a2f3a;
-  --color-border-medium: #3a4050;
 }
 
 * {
@@ -26,6 +33,18 @@ html, body, #root {
   font-family: var(--font-body);
 }
 
+/* Consistent property row — label left, control right */
+.property-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.property-row > span:first-child {
+  width: 80px;
+  flex-shrink: 0;
+}
+
 /* Custom scrollbar for sidebar */
 aside::-webkit-scrollbar {
   width: 6px;
@@ -36,15 +55,15 @@ aside::-webkit-scrollbar-track {
 }
 
 aside::-webkit-scrollbar-thumb {
-  background: #2a2f3a;
+  background: #4a4a4a;
   border-radius: 3px;
 }
 
 aside::-webkit-scrollbar-thumb:hover {
-  background: #3a4050;
+  background: #5a5a5a;
 }
 
-/* Number input spinner removal for cleaner look */
+/* Number input spinner removal */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -52,60 +71,6 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
-}
-
-/* Range slider styling */
-.slider-input {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(
-    to right,
-    #d4a254 0%,
-    #d4a254 var(--slider-pct, 50%),
-    #1a1e27 var(--slider-pct, 50%),
-    #1a1e27 100%
-  );
-  cursor: pointer;
-  outline: none;
-}
-
-.slider-input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #d4a254;
-  border: 2px solid #13161c;
-  cursor: pointer;
-  box-shadow: 0 0 0 2px rgba(212, 162, 84, 0.15);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
-}
-
-.slider-input::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 5px rgba(212, 162, 84, 0.2);
-  transform: scale(1.15);
-}
-
-.slider-input::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #d4a254;
-  border: 2px solid #13161c;
-  cursor: pointer;
-  box-shadow: 0 0 0 2px rgba(212, 162, 84, 0.15);
-}
-
-.slider-input::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
-  background: #1a1e27;
-}
-
-.slider-input:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 5px rgba(212, 162, 84, 0.25);
 }
 
 @media print {

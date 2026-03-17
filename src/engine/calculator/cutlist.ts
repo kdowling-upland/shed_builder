@@ -115,7 +115,9 @@ export { formatInches };
 
 /** Compute standard rafter angle cuts for a given pitch (rise per 12 run) */
 function rafterAngleCuts(pitch: number, overhangInches: number): AngleCut[] {
-  const plumbDeg = parseFloat((Math.atan2(12, pitch) * (180 / Math.PI)).toFixed(1));
+  // Pitch angle from horizontal: e.g. 6/12 → arctan(0.5) ≈ 26.6°
+  // This is the miter saw setting for the plumb cut (measured from square/perpendicular)
+  const plumbDeg = parseFloat((Math.atan2(pitch, 12) * (180 / Math.PI)).toFixed(1));
   const seatDeg = parseFloat((90 - plumbDeg).toFixed(1));
   const cuts: AngleCut[] = [
     {
@@ -143,7 +145,7 @@ function rafterAngleCuts(pitch: number, overhangInches: number): AngleCut[] {
 function hipRafterAngleCuts(pitch: number): AngleCut[] {
   // Hip rafters run at 45° in plan, so the effective pitch is pitch / √2
   const effectivePitch = pitch / Math.SQRT2;
-  const plumbDeg = parseFloat((Math.atan2(12, effectivePitch) * (180 / Math.PI)).toFixed(1));
+  const plumbDeg = parseFloat((Math.atan2(effectivePitch, 12) * (180 / Math.PI)).toFixed(1));
   const cheekAngle = 45;
   return [
     {
@@ -295,7 +297,10 @@ export function generateCutList(design: ShedDesign): CutItem[] {
       }
 
       // Cripple studs above header
-      const headerTopInches = headerHeight;
+      // headerHeight is from floor to top of rough opening (= top of trimmer + bottom plate)
+      // The double 2x8 header (7.25" deep) sits above the trimmer, so add its depth
+      const headerDepth = 7.25; // 2x8 on edge
+      const headerTopInches = headerHeight + headerDepth - 1.5; // from top of bottom plate
       const crippleAboveLen = studHeightInches - headerTopInches;
       if (crippleAboveLen > 3) {
         const crippleAboveCount = Math.max(1, Math.floor(op.width / framing.studSpacing));

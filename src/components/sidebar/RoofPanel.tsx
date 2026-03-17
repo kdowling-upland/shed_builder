@@ -39,8 +39,9 @@ export function RoofPanel() {
         max={DIMENSION_LIMITS.overhang.max}
         unit="in"
       />
-      <div className="text-[11px] text-gray-500 pt-1 font-medium tabular-nums">
-        {roof.pitch}/12 pitch = {Math.round(Math.atan(roof.pitch / 12) * (180 / Math.PI))}°
+      <div className="text-[10px] text-text-muted tabular-nums pt-1 mt-0.5 border-t border-border-subtle/50 flex items-center gap-3">
+        <span className="w-[80px] shrink-0">Angle</span>
+        <span className="text-text-secondary">{roof.pitch}/12 = {Math.round(Math.atan(roof.pitch / 12) * (180 / Math.PI))}°</span>
       </div>
     </PanelSection>
   );

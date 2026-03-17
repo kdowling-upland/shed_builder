@@ -6,7 +6,10 @@ import { OpeningsPanel } from './OpeningsPanel.tsx';
 
 export function Sidebar() {
   return (
-    <div className="flex flex-col gap-2.5 py-2.5 px-2.5">
+    <div className="flex flex-col">
+      <div className="px-3 py-1.5 bg-surface-header border-b border-border-subtle">
+        <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Inspector</span>
+      </div>
       <DimensionsPanel />
       <RoofPanel />
       <MaterialsPanel />

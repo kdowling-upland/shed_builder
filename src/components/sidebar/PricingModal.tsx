@@ -11,10 +11,10 @@ interface PriceRowProps {
 
 function PriceRow({ label, value, unit, onChange }: PriceRowProps) {
   return (
-    <div className="flex items-center justify-between gap-3 py-1.5">
-      <span className="text-[13px] text-gray-300 truncate">{label}</span>
+    <div className="flex items-center justify-between gap-3 py-1">
+      <span className="text-[11px] text-text-secondary truncate">{label}</span>
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-gray-500 text-xs">$</span>
+        <span className="text-text-muted text-[10px]">$</span>
         <input
           type="number"
           value={value}
@@ -24,9 +24,9 @@ function PriceRow({ label, value, unit, onChange }: PriceRowProps) {
           }}
           step="0.25"
           min="0"
-          className="w-20 bg-surface-input text-gray-100 px-2 py-1 rounded border border-border-subtle text-xs text-right font-body tabular-nums focus:border-amber-warm/50 focus:outline-none transition-colors"
+          className="w-20 bg-surface-input text-text-primary px-2 py-0.5 rounded-sm border border-border-subtle text-[11px] text-right font-body tabular-nums focus:border-accent focus:outline-none transition-colors"
         />
-        <span className="text-[10px] text-gray-500 w-16 truncate">{unit}</span>
+        <span className="text-[10px] text-text-muted w-16 truncate">{unit}</span>
       </div>
     </div>
   );
@@ -40,8 +40,8 @@ interface CategoryProps {
 function Category({ title, children }: CategoryProps) {
   return (
     <div>
-      <h4 className="text-[11px] font-bold uppercase tracking-[0.12em] text-amber-warm/70 mb-2 mt-1">{title}</h4>
-      <div className="space-y-0.5">{children}</div>
+      <h4 className="text-[10px] font-bold uppercase tracking-wider text-accent mb-1.5 mt-0.5">{title}</h4>
+      <div className="space-y-0">{children}</div>
     </div>
   );
 }
@@ -123,25 +123,25 @@ export function PricingModal() {
       onClick={(e) => { if (e.target === overlayRef.current) close(); }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
     >
-      <div className="bg-surface-panel border border-border-medium rounded-xl shadow-2xl shadow-black/60 w-[640px] max-h-[85vh] flex flex-col">
+      <div className="bg-surface-panel border border-border-medium rounded-sm shadow-2xl shadow-black/60 w-[600px] max-h-[85vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0 bg-surface-header">
           <div>
-            <h2 className="text-lg font-display text-amber-warm tracking-wide">Material Pricing</h2>
-            <p className="text-[11px] text-gray-500 mt-0.5">Adjust prices to match your local market</p>
+            <h2 className="text-sm font-bold text-text-primary">Material Pricing</h2>
+            <p className="text-[10px] text-text-muted mt-0.5">Adjust prices to match your local market</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={resetAll}
-              className="text-[11px] text-gray-500 hover:text-gray-300 uppercase tracking-wider font-semibold transition-colors"
+              className="text-[10px] text-text-muted hover:text-text-secondary uppercase tracking-wider font-semibold transition-colors"
             >
               Reset Defaults
             </button>
             <button
               onClick={close}
-              className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-colors"
+              className="w-6 h-6 flex items-center justify-center rounded-sm text-text-muted hover:text-text-primary hover:bg-surface-elevated transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
@@ -149,7 +149,7 @@ export function PricingModal() {
         </div>
 
         {/* Scrollable body */}
-        <div className="overflow-y-auto px-6 py-4 space-y-5 flex-1">
+        <div className="overflow-y-auto px-4 py-3 space-y-4 flex-1">
           <Category title="Lumber">
             {Object.entries(lumber).map(([key, price]) => (
               <PriceRow key={key} label={LUMBER_LABELS[key] ?? key} value={price} unit="/piece" onChange={(v) => setLumber(key, v)} />
@@ -194,10 +194,10 @@ export function PricingModal() {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-border-subtle shrink-0 flex justify-end">
+        <div className="px-4 py-2.5 border-t border-border-subtle shrink-0 flex justify-end">
           <button
             onClick={close}
-            className="px-5 py-2 bg-amber-warm/90 text-gray-950 rounded-md hover:bg-amber-glow text-sm font-semibold transition-colors"
+            className="px-4 py-1.5 bg-accent text-white rounded-sm hover:bg-accent-hover text-xs font-semibold transition-colors"
           >
             Done
           </button>

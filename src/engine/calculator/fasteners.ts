@@ -74,18 +74,16 @@ export function calculateFasteners(design: ShedDesign): MaterialItem[] {
     category: 'fasteners',
   });
 
-  // Opening headers hardware
-  if (openings.length > 0) {
-    items.push({
-      name: 'Anchor Bolt',
-      description: 'Foundation anchors',
-      quantity: Math.ceil(perimeterFt / 4),
-      unit: 'piece',
-      unitPrice: usePriceStore.getState().fasteners.anchorBolt,
-      totalPrice: Math.ceil(perimeterFt / 4) * usePriceStore.getState().fasteners.anchorBolt,
-      category: 'fasteners',
-    });
-  }
+  // Anchor bolts for foundation attachment
+  items.push({
+    name: 'Anchor Bolt',
+    description: 'Foundation anchors',
+    quantity: Math.ceil(perimeterFt / 4),
+    unit: 'piece',
+    unitPrice: usePriceStore.getState().fasteners.anchorBolt,
+    totalPrice: Math.ceil(perimeterFt / 4) * usePriceStore.getState().fasteners.anchorBolt,
+    category: 'fasteners',
+  });
 
   return items;
 }

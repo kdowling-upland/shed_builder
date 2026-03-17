@@ -1,9 +1,10 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { OrbitControls, Grid } from '@react-three/drei';
 import { ShedModel } from './ShedModel.tsx';
 import { useShedStore } from '../../store/useShedStore.ts';
 import { useUIStore } from '../../store/useUIStore.ts';
 import { useCallback } from 'react';
+import * as THREE from 'three';
 
 export function SceneContainer() {
   const design = useShedStore((s) => s.design);
@@ -25,16 +26,17 @@ export function SceneContainer() {
           far: 500,
         }}
         gl={{ preserveDrawingBuffer: true }}
-        shadows
+        shadows={{ type: THREE.PCFShadowMap }}
         onCreated={onCreated}
       >
-        <Environment preset="sunset" />
-        <ambientLight intensity={0.6} />
+        <ambientLight intensity={0.8} />
         <directionalLight
           position={[20, 30, 10]}
           intensity={1.8}
           castShadow
         />
+        <directionalLight position={[-10, 20, -10]} intensity={0.4} />
+        <hemisphereLight args={['#b1e1ff', '#b97a20', 0.5]} />
 
         <ShedModel />
 

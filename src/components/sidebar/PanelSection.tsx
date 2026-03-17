@@ -10,24 +10,24 @@ export function PanelSection({ title, children, defaultOpen = true }: PanelSecti
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-surface-panel rounded-sm border-t border-border-subtle/40">
+    <div className="border-b border-border-subtle">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full px-5 py-3.5 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.14em] text-amber-warm/80 hover:text-amber-warm hover:bg-white/[0.03] transition-colors"
+        className="w-full px-4 py-2 flex items-center gap-2 text-[11px] font-bold text-text-primary bg-surface-header hover:bg-surface-elevated transition-colors"
       >
-        {title}
         <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
+          width="8"
+          height="8"
+          viewBox="0 0 8 8"
           fill="none"
-          className={`text-gray-600 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`text-text-secondary transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
         >
-          <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M2 1l4 3-4 3z" fill="currentColor"/>
         </svg>
+        {title}
       </button>
       {open && (
-        <div className="px-5 pb-4 pt-1 space-y-3.5">
+        <div className="px-4 py-3 space-y-1.5 bg-surface-panel">
           {children}
         </div>
       )}
