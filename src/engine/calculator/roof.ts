@@ -15,10 +15,10 @@ function lumberPrice(size: string, lengthFt: number): number {
 
 export function getRafterLength(span: number, pitch: number, overhangInches: number): number {
   // span is the horizontal run (half of shed width for gable)
-  const rise = (span * pitch) / 12;
-  const rafterRun = Math.sqrt(span * span + rise * rise);
-  const overhangFt = overhangInches / 12;
-  return rafterRun + overhangFt;
+  // Include overhang (horizontal projection) in the run before computing slope length
+  const totalRun = span + overhangInches / 12;
+  const slopeFactor = Math.sqrt(1 + (pitch / 12) ** 2);
+  return totalRun * slopeFactor;
 }
 
 export function calculateRoof(design: ShedDesign): MaterialItem[] {

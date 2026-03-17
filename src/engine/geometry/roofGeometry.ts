@@ -48,7 +48,8 @@ export function getGambrelPoints(width: number, wallHeight: number, roof: RoofCo
 }
 
 export function getRafterLength(halfSpan: number, pitch: number, overhangInches: number): number {
-  const rise = (halfSpan * pitch) / 12;
-  const run = Math.sqrt(halfSpan * halfSpan + rise * rise);
-  return run + overhangInches / 12;
+  // Include overhang (horizontal projection) in the run before computing slope length
+  const totalRun = halfSpan + overhangInches / 12;
+  const slopeFactor = Math.sqrt(1 + (pitch / 12) ** 2);
+  return totalRun * slopeFactor;
 }

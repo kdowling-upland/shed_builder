@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(npx vite:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cd \"C:/Users/KevinDowling/Code/shed_builder\" && npm install)",
+      "Bash(cd \"C:/Users/KevinDowling/Code/shed_builder\" && npm run build)"
     ]
   }
 }

@@ -32,6 +32,55 @@ function standardLength(ft: number): number {
   return std.find((l) => l >= ft) ?? 16;
 }
 
+/**
+ * Push cut entries for a continuous member that may need splicing from
+ * multiple boards when the total length exceeds standard stock sizes.
+ */
+function pushContinuousMember(
+  cuts: CutItem[],
+  phase: CutItem['phase'],
+  lumberSize: string,
+  totalLengthInches: number,
+  label: string,
+  qty: number = 1,
+) {
+  const totalFeet = totalLengthInches / 12;
+  if (totalFeet <= 16) {
+    cuts.push({
+      phase,
+      lumberSize,
+      stockLength: standardLength(Math.ceil(totalFeet)),
+      cutLengthInches: totalLengthInches,
+      qty,
+      label: `${label} – ${formatInches(totalLengthInches)}`,
+    });
+    return;
+  }
+  // Needs splicing: split into 16' sections + remainder
+  const fullCount = Math.floor(totalFeet / 16);
+  const remainderInches = totalLengthInches - fullCount * 16 * 12;
+  const totalPieces = fullCount + (remainderInches > 6 ? 1 : 0);
+
+  cuts.push({
+    phase,
+    lumberSize,
+    stockLength: 16,
+    cutLengthInches: 16 * 12,
+    qty: fullCount * qty,
+    label: `${label} – 16' 0" (join ${totalPieces} pcs for ${formatInches(totalLengthInches)} total)`,
+  });
+  if (remainderInches > 6) {
+    cuts.push({
+      phase,
+      lumberSize,
+      stockLength: standardLength(Math.ceil(remainderInches / 12)),
+      cutLengthInches: remainderInches,
+      qty,
+      label: `${label} – ${formatInches(remainderInches)} (remainder piece)`,
+    });
+  }
+}
+
 function formatInches(inches: number): string {
   const ft = Math.floor(inches / 12);
   const rem = Math.round((inches % 12) * 16) / 16; // round to 1/16
@@ -132,40 +181,17 @@ export function generateCutList(design: ShedDesign): CutItem[] {
   // ── FOUNDATION ──
   if (design.foundation === 'skids') {
     const skidCount = Math.max(2, Math.ceil(width / 4) + 1);
-    const skidLenInches = length * 12;
-    cuts.push({
-      phase: 'foundation',
-      lumberSize: '4x4 Treated',
-      stockLength: standardLength(length),
-      cutLengthInches: skidLenInches,
-      qty: skidCount,
-      label: `Foundation skid – ${formatInches(skidLenInches)} long`,
-    });
+    pushContinuousMember(cuts, 'foundation', '4x4 Treated', length * 12, 'Foundation skid', skidCount);
   }
 
   // ── FLOOR ──
   // Rim joists (along length)
-  const rimLenInches = length * 12;
-  cuts.push({
-    phase: 'floor',
-    lumberSize: framing.joistSize,
-    stockLength: standardLength(length),
-    cutLengthInches: rimLenInches,
-    qty: 2,
-    label: `Rim joist – ${formatInches(rimLenInches)}`,
-  });
+  pushContinuousMember(cuts, 'floor', framing.joistSize, length * 12, 'Rim joist', 2);
 
   // Band joists (along width, fit between rims)
   // Actual dimension of a 2x is 1.5", so band = width*12 - 2*(1.5) = width*12 - 3
   const bandLenInches = width * 12 - 3;
-  cuts.push({
-    phase: 'floor',
-    lumberSize: framing.joistSize,
-    stockLength: standardLength(width),
-    cutLengthInches: bandLenInches,
-    qty: 2,
-    label: `Band joist (end cap) – ${formatInches(bandLenInches)}`,
-  });
+  pushContinuousMember(cuts, 'floor', framing.joistSize, bandLenInches, 'Band joist (end cap)', 2);
 
   // Floor joists (span the width, fit between rims)
   const floorJoistLen = width * 12 - 3; // between rims
@@ -190,24 +216,9 @@ export function generateCutList(design: ShedDesign): CutItem[] {
   for (const wall of walls) {
     const wLen = wallLength(design, wall);
     const plateLenInches = wLen * 12;
-    const plateStock = standardLength(wLen);
 
-    cuts.push({
-      phase: 'walls',
-      lumberSize: framing.studSize,
-      stockLength: plateStock,
-      cutLengthInches: plateLenInches,
-      qty: 1,
-      label: `Bottom plate – ${wall} wall – ${formatInches(plateLenInches)}`,
-    });
-    cuts.push({
-      phase: 'walls',
-      lumberSize: framing.studSize,
-      stockLength: plateStock,
-      cutLengthInches: plateLenInches,
-      qty: 2,
-      label: `Top plate (double) – ${wall} wall – ${formatInches(plateLenInches)}`,
-    });
+    pushContinuousMember(cuts, 'walls', framing.studSize, plateLenInches, `Bottom plate – ${wall} wall`, 1);
+    pushContinuousMember(cuts, 'walls', framing.studSize, plateLenInches, `Top plate (double) – ${wall} wall`, 2);
   }
 
   // Studs per wall
@@ -315,8 +326,10 @@ export function generateCutList(design: ShedDesign): CutItem[] {
   switch (roof.style) {
     case 'gable': {
       const halfSpan = width / 2;
-      const rise = (halfSpan * roof.pitch) / 12;
-      const rafterRunInches = Math.sqrt((halfSpan * 12) ** 2 + (rise * 12) ** 2) + roof.overhang;
+      // Include overhang in horizontal run before computing slope length
+      const totalRunInches = halfSpan * 12 + roof.overhang;
+      const slopeFactor = Math.sqrt(1 + (roof.pitch / 12) ** 2);
+      const rafterRunInches = totalRunInches * slopeFactor;
       const raftersPerSide = Math.ceil((length * 12) / framing.rafterSpacing) + 1;
 
       cuts.push({
@@ -330,21 +343,15 @@ export function generateCutList(design: ShedDesign): CutItem[] {
       });
 
       // Ridge board
-      const ridgeLenInches = length * 12;
-      cuts.push({
-        phase: 'roof',
-        lumberSize: '2x8',
-        stockLength: standardLength(length),
-        cutLengthInches: ridgeLenInches,
-        qty: Math.ceil(length / 16),
-        label: `Ridge board – ${formatInches(ridgeLenInches)}`,
-      });
+      pushContinuousMember(cuts, 'roof', '2x8', length * 12, 'Ridge board');
       break;
     }
 
     case 'lean-to': {
-      const rise = (width * roof.pitch) / 12;
-      const rafterRunInches = Math.sqrt((width * 12) ** 2 + (rise * 12) ** 2) + roof.overhang * 2;
+      // Include overhang in horizontal run before computing slope length
+      const totalRunInches = width * 12 + roof.overhang * 2;
+      const slopeFactor = Math.sqrt(1 + (roof.pitch / 12) ** 2);
+      const rafterRunInches = totalRunInches * slopeFactor;
       const rafterCount = Math.ceil((length * 12) / framing.rafterSpacing) + 1;
 
       cuts.push({
@@ -358,24 +365,16 @@ export function generateCutList(design: ShedDesign): CutItem[] {
       });
 
       // Ledger board on high side
-      cuts.push({
-        phase: 'roof',
-        lumberSize: '2x6',
-        stockLength: standardLength(length),
-        cutLengthInches: length * 12,
-        qty: 1,
-        label: `Ledger board (high side) – ${formatInches(length * 12)}`,
-      });
+      pushContinuousMember(cuts, 'roof', '2x6', length * 12, 'Ledger board (high side)');
       break;
     }
 
     case 'gambrel': {
       const { lowerRad, upperRad } = gambrelAngles(roof.pitch);
       const qw = width / 4;
-      const lowerRise = qw * Math.tan(lowerRad);
-      const upperRise = qw * Math.tan(upperRad);
-      const lowerRunInches = Math.sqrt((qw * 12) ** 2 + (lowerRise * 12) ** 2) + roof.overhang;
-      const upperRunInches = Math.sqrt((qw * 12) ** 2 + (upperRise * 12) ** 2);
+      // Include overhang in lower rafter horizontal run
+      const lowerRunInches = (qw * 12 + roof.overhang) / Math.cos(lowerRad);
+      const upperRunInches = (qw * 12) / Math.cos(upperRad);
       const raftersPerSide = Math.ceil((length * 12) / framing.rafterSpacing) + 1;
 
       const lowerDeg = parseFloat((lowerRad * 180 / Math.PI).toFixed(1));
@@ -412,22 +411,16 @@ export function generateCutList(design: ShedDesign): CutItem[] {
         ],
       });
 
-      const ridgeLenInches = length * 12;
-      cuts.push({
-        phase: 'roof',
-        lumberSize: '2x8',
-        stockLength: standardLength(length),
-        cutLengthInches: ridgeLenInches,
-        qty: Math.ceil(length / 16),
-        label: `Ridge board – ${formatInches(ridgeLenInches)}`,
-      });
+      pushContinuousMember(cuts, 'roof', '2x8', length * 12, 'Ridge board');
       break;
     }
 
     case 'hip': {
       const halfSpan = width / 2;
-      const rise = (halfSpan * roof.pitch) / 12;
-      const commonRunInches = Math.sqrt((halfSpan * 12) ** 2 + (rise * 12) ** 2) + roof.overhang;
+      // Include overhang in horizontal run before computing slope length
+      const totalRunInches = halfSpan * 12 + roof.overhang;
+      const slopeFactor = Math.sqrt(1 + (roof.pitch / 12) ** 2);
+      const commonRunInches = totalRunInches * slopeFactor;
       const ridgeLen = Math.max(0, length - width);
       const commonPerSide = Math.ceil((ridgeLen * 12) / framing.rafterSpacing) + 1;
 
@@ -442,8 +435,10 @@ export function generateCutList(design: ShedDesign): CutItem[] {
       });
 
       // Hip rafters (run at 45° in plan, so longer)
-      const hipRunHoriz = halfSpan * Math.SQRT2;
-      const hipRunInches = Math.sqrt((hipRunHoriz * 12) ** 2 + (rise * 12) ** 2) + roof.overhang;
+      // Overhang extends the horizontal run; hip runs at 45° in plan
+      const hipRunHoriz = totalRunInches * Math.SQRT2;
+      const hipRiseInches = totalRunInches * roof.pitch / 12;
+      const hipRunInches = Math.sqrt(hipRunHoriz ** 2 + hipRiseInches ** 2);
       cuts.push({
         phase: 'roof',
         lumberSize: rafterSize,
@@ -474,29 +469,14 @@ export function generateCutList(design: ShedDesign): CutItem[] {
       }
 
       if (ridgeLen > 0) {
-        cuts.push({
-          phase: 'roof',
-          lumberSize: '2x8',
-          stockLength: standardLength(Math.ceil(ridgeLen)),
-          cutLengthInches: ridgeLen * 12,
-          qty: 1,
-          label: `Ridge board – ${formatInches(ridgeLen * 12)}`,
-        });
+        pushContinuousMember(cuts, 'roof', '2x8', ridgeLen * 12, 'Ridge board');
       }
       break;
     }
   }
 
   // Fascia boards
-  const fasciaLen = length * 12;
-  cuts.push({
-    phase: 'trim',
-    lumberSize: '1x6',
-    stockLength: standardLength(length),
-    cutLengthInches: fasciaLen,
-    qty: 2,
-    label: `Fascia board (eave) – ${formatInches(fasciaLen)}`,
-  });
+  pushContinuousMember(cuts, 'trim', '1x6', length * 12, 'Fascia board (eave)', 2);
 
   if (roof.style === 'gable' || roof.style === 'gambrel') {
     const halfSpan = width / 2;
@@ -508,7 +488,11 @@ export function generateCutList(design: ShedDesign): CutItem[] {
       const qw = width / 4;
       rise = qw * Math.tan(lowerRad) + qw * Math.tan(upperRad);
     }
-    const rakeLen = Math.sqrt((halfSpan * 12) ** 2 + (rise * 12) ** 2) + roof.overhang;
+    // Rake board follows the rafter slope; include overhang in horizontal run
+    const totalRakeRunInches = halfSpan * 12 + roof.overhang;
+    const rakeLen = roof.style === 'gable'
+      ? totalRakeRunInches * Math.sqrt(1 + (roof.pitch / 12) ** 2)
+      : Math.sqrt((halfSpan * 12 + roof.overhang) ** 2 + (rise * 12) ** 2); // gambrel: approximate
     cuts.push({
       phase: 'trim',
       lumberSize: '1x6',

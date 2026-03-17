@@ -6,7 +6,8 @@ import { useUIStore } from '../../store/useUIStore.ts';
 import { calculateBuildPlan } from '../../engine/calculator/index.ts';
 import { generateCutList } from '../../engine/calculator/cutlist.ts';
 import { generatePDF } from '../../engine/pdf/pdfGenerator.ts';
-import { useState, useCallback } from 'react';
+import { generateMarkdown } from '../../engine/markdown/markdownGenerator.ts';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 export function Toolbar() {
   const { undo, redo, canUndo, canRedo } = useUndoRedo();
@@ -16,7 +17,19 @@ export function Toolbar() {
   const setName = useShedStore((s) => s.setName);
   const canvasRef = useUIStore((s) => s.canvasRef);
   const [showSaveLoad, setShowSaveLoad] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    }
+    if (showExportMenu) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
 
   const handleSave = () => {
     saveDesign(design);
@@ -33,6 +46,7 @@ export function Toolbar() {
 
   const handleExportPDF = useCallback(async () => {
     setExporting(true);
+    setShowExportMenu(false);
     try {
       await new Promise((r) => setTimeout(r, 50));
 
@@ -50,6 +64,21 @@ export function Toolbar() {
       setExporting(false);
     }
   }, [design, canvasRef]);
+
+  const handleExportMarkdown = useCallback(() => {
+    setShowExportMenu(false);
+    const buildPlan = calculateBuildPlan(design);
+    const cutList = generateCutList(design);
+    const md = generateMarkdown(design, buildPlan, cutList);
+    const safeName = design.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}_Build_Plan.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [design]);
 
   return (
     <header className="bg-surface-panel border-b border-border-subtle px-5 py-2.5 flex items-center justify-between">
@@ -99,11 +128,24 @@ export function Toolbar() {
           </button>
         </div>
 
+        <button
+          onClick={() => useUIStore.getState().setPricingModalOpen(true)}
+          className="px-3.5 py-1.5 text-sm text-gray-300 rounded-md hover:text-gray-100 hover:bg-surface-elevated border border-border-subtle transition-colors font-medium flex items-center gap-1.5"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Edit Prices
+        </button>
+
         <div className="relative">
           <button
             onClick={() => setShowSaveLoad(!showSaveLoad)}
-            className="px-3.5 py-1.5 text-sm text-gray-300 rounded-md hover:text-gray-100 hover:bg-surface-elevated border border-border-subtle transition-colors font-medium"
+            className="px-3.5 py-1.5 text-sm text-gray-300 rounded-md hover:text-gray-100 hover:bg-surface-elevated border border-border-subtle transition-colors font-medium flex items-center gap-1.5"
           >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+            </svg>
             Save / Load
           </button>
           {showSaveLoad && (
@@ -142,23 +184,47 @@ export function Toolbar() {
           )}
         </div>
 
-        <button
-          onClick={handleExportPDF}
-          disabled={exporting}
-          className="px-4 py-1.5 text-sm bg-amber-warm text-gray-950 rounded-md hover:bg-amber-glow font-semibold disabled:opacity-60 flex items-center gap-2 transition-colors"
-        >
-          {exporting ? (
-            <>
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Generating...
-            </>
-          ) : (
-            'Export PDF'
+        <div className="relative" ref={exportMenuRef}>
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            disabled={exporting}
+            className="px-4 py-1.5 text-sm bg-amber-warm text-gray-950 rounded-md hover:bg-amber-glow font-semibold disabled:opacity-60 flex items-center gap-1.5 transition-colors"
+          >
+            {exporting ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Generating...
+              </>
+            ) : (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" className="shrink-0 -ml-0.5"><path d="M2 4l3 3 3-3" /></svg>
+              </>
+            )}
+          </button>
+          {showExportMenu && (
+            <div className="absolute right-0 top-full mt-2 bg-surface-elevated border border-border-medium rounded-lg shadow-2xl shadow-black/50 py-1 w-40 z-50">
+              <button
+                onClick={handleExportPDF}
+                className="w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-surface-input text-left transition-colors"
+              >
+                PDF
+              </button>
+              <button
+                onClick={handleExportMarkdown}
+                className="w-full px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-surface-input text-left transition-colors"
+              >
+                Markdown
+              </button>
+            </div>
           )}
-        </button>
+        </div>
       </div>
     </header>
   );

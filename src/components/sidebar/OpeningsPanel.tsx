@@ -20,6 +20,13 @@ const wallOptions: { value: string; label: string }[] = [
   { value: 'right', label: 'Right' },
 ];
 
+const typeLabels: Record<string, string> = {
+  'single-door': 'Door',
+  'double-door': 'Dbl Door',
+  'window': 'Window',
+  'loft-door': 'Loft Door',
+};
+
 export function OpeningsPanel() {
   const openings = useShedStore((s) => s.design.openings);
   const addOpening = useShedStore((s) => s.addOpening);
@@ -57,71 +64,91 @@ export function OpeningsPanel() {
       </div>
 
       {openings.length === 0 && (
-        <p className="text-xs text-gray-600">No openings added yet.</p>
+        <p className="text-xs text-gray-600 italic">No openings added yet.</p>
       )}
 
-      <div className="space-y-3">
-        {openings.map((opening) => (
-          <div
-            key={opening.id}
-            className={`p-3 rounded-lg border transition-colors cursor-pointer ${
-              selectedId === opening.id
-                ? 'border-amber-warm/30 bg-amber-warm/[0.04]'
-                : 'border-border-subtle bg-surface-input/50 hover:border-border-medium'
-            }`}
-            onClick={() => setSelectedId(opening.id)}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-bold text-gray-200 uppercase tracking-wider">
-                {opening.type.replace(/-/g, ' ')}
-              </span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeOpening(opening.id);
-                  if (selectedId === opening.id) setSelectedId(null);
-                }}
-                className="text-[11px] text-red-400/50 hover:text-red-400 transition-colors font-medium"
-              >
-                Remove
-              </button>
-            </div>
-            <div className="space-y-3">
-              <SelectInput
-                label="Wall"
-                value={opening.wall}
-                onChange={(v) => updateOpening(opening.id, { wall: v as WallId })}
-                options={wallOptions}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <NumberInput
-                  label="W"
-                  value={opening.width}
-                  onChange={(v) => updateOpening(opening.id, { width: v })}
-                  min={12}
-                  max={120}
-                  unit="in"
-                />
-                <NumberInput
-                  label="H"
-                  value={opening.height}
-                  onChange={(v) => updateOpening(opening.id, { height: v })}
-                  min={12}
-                  max={96}
-                  unit="in"
-                />
+      {openings.length > 0 && (
+        <div className="-mx-5 border-t border-border-subtle/30">
+          {openings.map((opening) => {
+            const isSelected = selectedId === opening.id;
+            const wallLabel = wallOptions.find((w) => w.value === opening.wall)?.label ?? opening.wall;
+
+            return (
+              <div key={opening.id} className="border-b border-border-subtle/20">
+                {/* Compact summary row — always visible */}
+                <button
+                  onClick={() => setSelectedId(isSelected ? null : opening.id)}
+                  className={`w-full flex items-center gap-2 pl-7 pr-5 py-2 text-left transition-colors ${
+                    isSelected
+                      ? 'bg-amber-warm/[0.06] text-gray-100'
+                      : 'text-gray-400 hover:bg-white/[0.03] hover:text-gray-300'
+                  }`}
+                >
+                  <svg width="6" height="6" viewBox="0 0 6 6" className={`shrink-0 transition-transform duration-150 ${isSelected ? 'rotate-90' : ''}`}>
+                    <path d="M1.5 0.5L4.5 3L1.5 5.5" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                      className={isSelected ? 'text-amber-warm/70' : 'text-gray-600'} />
+                  </svg>
+                  <span className={`text-[11px] font-bold uppercase tracking-wider shrink-0 ${
+                    isSelected ? 'text-amber-warm/90' : ''
+                  }`}>
+                    {typeLabels[opening.type] ?? opening.type}
+                  </span>
+                  <span className="text-[11px] text-gray-500 tabular-nums truncate">
+                    {wallLabel} · {opening.width}×{opening.height}″
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeOpening(opening.id);
+                      if (isSelected) setSelectedId(null);
+                    }}
+                    className="ml-auto text-[11px] text-red-400/40 hover:text-red-400 transition-colors font-medium shrink-0"
+                  >
+                    ×
+                  </button>
+                </button>
+
+                {/* Expanded detail panel — only for selected */}
+                {isSelected && (
+                  <div className="pl-10 pr-5 pb-3 pt-0.5 space-y-3 bg-white/[0.015]">
+                    <SelectInput
+                      label="Wall"
+                      value={opening.wall}
+                      onChange={(v) => updateOpening(opening.id, { wall: v as WallId })}
+                      options={wallOptions}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <NumberInput
+                        label="W"
+                        value={opening.width}
+                        onChange={(v) => updateOpening(opening.id, { width: v })}
+                        min={12}
+                        max={120}
+                        unit="in"
+                      />
+                      <NumberInput
+                        label="H"
+                        value={opening.height}
+                        onChange={(v) => updateOpening(opening.id, { height: v })}
+                        min={12}
+                        max={96}
+                        unit="in"
+                      />
+                    </div>
+                    <NumberInput
+                      label="Position"
+                      value={opening.position}
+                      onChange={(v) => updateOpening(opening.id, { position: v })}
+                      min={0}
+                      unit="in"
+                    />
+                  </div>
+                )}
               </div>
-              <NumberInput
-                label="Position"
-                value={opening.position}
-                onChange={(v) => updateOpening(opening.id, { position: v })}
-                min={0}
-                unit="in"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </PanelSection>
   );
 }
