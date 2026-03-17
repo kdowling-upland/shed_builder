@@ -19,6 +19,12 @@ export const LUMBER_PRICES: Record<string, number> = {
   '2x12x8': 15.00,
   '2x12x12': 22.50,
   '2x12x16': 30.00,
+  // Trim lumber (1x stock)
+  '1x4x8': 3.50,
+  '1x6x8': 5.00,
+  '1x6x10': 6.25,
+  '1x6x12': 7.50,
+  '1x6x16': 10.00,
 };
 
 // Sheathing / panel prices per sheet (4x8)
@@ -70,4 +76,13 @@ export const OPENING_PRICES: Record<string, number> = {
   'double-door': 350.00,
   'window': 120.00,
   'loft-door': 95.00,
+};
+
+// Finishing supplies
+export const FINISHING_PRICES = {
+  caulkTube: 5.00,           // per tube
+  exteriorPaintGallon: 35.00, // per gallon (~350 sq ft coverage)
+  doorHardwareSet: 25.00,    // handle + lock set
+  weatherstripping: 12.00,   // per door kit
+  shimPack: 5.00,            // per pack
 };

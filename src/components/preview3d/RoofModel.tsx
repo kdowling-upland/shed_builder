@@ -17,6 +17,12 @@ function makeQuad(a: V3, b: V3, c: V3, d: V3): THREE.BufferGeometry {
   const geo = new THREE.BufferGeometry();
   const vertices = new Float32Array([...a, ...b, ...c, ...a, ...c, ...d]);
   geo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  // UVs: a=bottom-left, b=top-left, c=top-right, d=bottom-right
+  const uvs = new Float32Array([
+    0, 0,  1, 0,  1, 1,
+    0, 0,  1, 1,  0, 1,
+  ]);
+  geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
   geo.computeVertexNormals();
   return geo;
 }
@@ -25,6 +31,10 @@ function makeTri(a: V3, b: V3, c: V3): THREE.BufferGeometry {
   const geo = new THREE.BufferGeometry();
   const vertices = new Float32Array([...a, ...b, ...c]);
   geo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  const uvs = new Float32Array([
+    0, 0,  1, 0,  0.5, 1,
+  ]);
+  geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
   geo.computeVertexNormals();
   return geo;
 }
@@ -54,15 +64,26 @@ function mergeGeos(geos: THREE.BufferGeometry[]): THREE.BufferGeometry {
   let totalVerts = 0;
   for (const g of geos) totalVerts += g.getAttribute('position').count;
   const positions = new Float32Array(totalVerts * 3);
-  let offset = 0;
+  const uvs = new Float32Array(totalVerts * 2);
+  let posOffset = 0;
+  let uvOffset = 0;
   for (const g of geos) {
     const pos = g.getAttribute('position');
     for (let i = 0; i < pos.count * 3; i++) {
-      positions[offset++] = (pos.array as Float32Array)[i];
+      positions[posOffset++] = (pos.array as Float32Array)[i];
+    }
+    const uv = g.getAttribute('uv');
+    if (uv) {
+      for (let i = 0; i < uv.count * 2; i++) {
+        uvs[uvOffset++] = (uv.array as Float32Array)[i];
+      }
+    } else {
+      uvOffset += pos.count * 2;
     }
   }
   const merged = new THREE.BufferGeometry();
   merged.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  merged.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
   merged.computeVertexNormals();
   return merged;
 }

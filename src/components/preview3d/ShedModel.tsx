@@ -2,6 +2,7 @@ import { useShedStore } from '../../store/useShedStore.ts';
 import { FloorModel } from './FloorModel.tsx';
 import { WallModel } from './WallModel.tsx';
 import { RoofModel } from './RoofModel.tsx';
+import { RafterFramingModel } from './RafterFramingModel.tsx';
 import { OpeningModel } from './OpeningModel.tsx';
 import { FramingModel } from './FramingModel.tsx';
 import type { WallId } from '../../types/shed.ts';
@@ -38,6 +39,13 @@ export function ShedModel() {
         </group>
       ))}
 
+      <RafterFramingModel
+        widthFt={width}
+        lengthFt={length}
+        wallHeight={wallHeight}
+        roof={roof}
+        framing={framing}
+      />
       <RoofModel
         widthFt={width}
         lengthFt={length}

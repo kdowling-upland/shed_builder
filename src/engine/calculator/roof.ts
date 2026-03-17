@@ -174,5 +174,54 @@ export function calculateRoof(design: ShedDesign): MaterialItem[] {
     category: 'roof',
   });
 
+  // Rake outriggers / lookouts (support gable-end overhang)
+  if ((roof.style === 'gable' || roof.style === 'gambrel') && roof.overhang > 0) {
+    const outriggerLenInches = roof.overhang + 16; // overhang + 16" bearing past gable wall
+    const outriggerSpacing = 24; // inches along the rake
+    const outriggersPerRake = Math.ceil((rafterLength * 12) / outriggerSpacing);
+    const totalOutriggers = outriggersPerRake * 4; // 4 rakes (2 per gable end)
+    // Multiple outriggers can be cut from one board
+    const perBoard = Math.floor((standardLength(Math.ceil(outriggerLenInches / 12)) * 12) / outriggerLenInches);
+    const boardsNeeded = Math.ceil(totalOutriggers / perBoard);
+    const outriggerStdLen = standardLength(Math.ceil(outriggerLenInches / 12));
+    const outriggerPrice = lumberPrice(framing.rafterSize, outriggerLenInches / 12);
+    items.push({
+      name: `${framing.rafterSize}x${outriggerStdLen} Outrigger`,
+      description: `Lookout blocks supporting ${roof.overhang}" rake overhang (${totalOutriggers} pieces from ${boardsNeeded} boards)`,
+      quantity: boardsNeeded,
+      unit: 'piece',
+      unitPrice: outriggerPrice,
+      totalPrice: boardsNeeded * outriggerPrice,
+      category: 'roof',
+    });
+  }
+
+  // Trim lumber — fascia and rake boards
+  const fasciaStdLen = standardLength(Math.ceil(length));
+  const fasciaPrice = lumberPrice('1x6', length);
+  items.push({
+    name: `1x6x${fasciaStdLen} Fascia Board`,
+    description: `Eave fascia, ${length}' long`,
+    quantity: 2,
+    unit: 'piece',
+    unitPrice: fasciaPrice,
+    totalPrice: 2 * fasciaPrice,
+    category: 'trim',
+  });
+
+  if (roof.style === 'gable' || roof.style === 'gambrel') {
+    const rakeStdLen = standardLength(Math.ceil(rafterLength));
+    const rakePrice = lumberPrice('1x6', rafterLength);
+    items.push({
+      name: `1x6x${rakeStdLen} Rake Board`,
+      description: `Rake/barge boards (4 total, 2 per gable end)`,
+      quantity: 4,
+      unit: 'piece',
+      unitPrice: rakePrice,
+      totalPrice: 4 * rakePrice,
+      category: 'trim',
+    });
+  }
+
   return items;
 }

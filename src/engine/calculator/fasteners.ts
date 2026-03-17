@@ -6,15 +6,16 @@ export function calculateFasteners(design: ShedDesign): MaterialItem[] {
   const { width, length, wallHeight, framing } = design;
   const items: MaterialItem[] = [];
 
-  // Floor joist hangers
+  // Floor joist hangers (2 per joist — one at each end)
   const joistCount = Math.ceil((length * 12) / framing.joistSpacing) - 1;
+  const hangerCount = joistCount * 2;
   items.push({
     name: 'Joist Hanger',
-    description: `For ${joistCount} floor joists`,
-    quantity: joistCount,
+    description: `For ${joistCount} floor joists (2 per joist)`,
+    quantity: hangerCount,
     unit: 'piece',
     unitPrice: usePriceStore.getState().fasteners.joistHanger,
-    totalPrice: joistCount * usePriceStore.getState().fasteners.joistHanger,
+    totalPrice: hangerCount * usePriceStore.getState().fasteners.joistHanger,
     category: 'fasteners',
   });
 
@@ -82,6 +83,58 @@ export function calculateFasteners(design: ShedDesign): MaterialItem[] {
     unit: 'piece',
     unitPrice: usePriceStore.getState().fasteners.anchorBolt,
     totalPrice: Math.ceil(perimeterFt / 4) * usePriceStore.getState().fasteners.anchorBolt,
+    category: 'fasteners',
+  });
+
+  // Finishing supplies
+  const doorCount = design.openings.filter(
+    (o) => o.type === 'single-door' || o.type === 'double-door',
+  ).length;
+
+  // Caulk (1 tube per 2 openings + 2 for siding seams, minimum 3)
+  const caulkTubes = Math.max(3, Math.ceil(design.openings.length / 2) + 2);
+  items.push({
+    name: 'Exterior Caulk',
+    description: `For siding joints, door/window sealing`,
+    quantity: caulkTubes,
+    unit: 'tube',
+    unitPrice: 5.00,
+    totalPrice: caulkTubes * 5.00,
+    category: 'fasteners',
+  });
+
+  // Door hardware (handle + lock per door)
+  if (doorCount > 0) {
+    items.push({
+      name: 'Door Hardware Set',
+      description: `Handle and lock set for ${doorCount} door(s)`,
+      quantity: doorCount,
+      unit: 'set',
+      unitPrice: 25.00,
+      totalPrice: doorCount * 25.00,
+      category: 'fasteners',
+    });
+
+    // Weatherstripping (per door)
+    items.push({
+      name: 'Weatherstripping Kit',
+      description: `For ${doorCount} door(s)`,
+      quantity: doorCount,
+      unit: 'kit',
+      unitPrice: 12.00,
+      totalPrice: doorCount * 12.00,
+      category: 'fasteners',
+    });
+  }
+
+  // Shims
+  items.push({
+    name: 'Shim Pack',
+    description: 'For leveling doors and windows',
+    quantity: Math.max(1, design.openings.length),
+    unit: 'pack',
+    unitPrice: 5.00,
+    totalPrice: Math.max(1, design.openings.length) * 5.00,
     category: 'fasteners',
   });
 

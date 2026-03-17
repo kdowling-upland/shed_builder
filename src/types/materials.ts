@@ -15,4 +15,5 @@ export type MaterialCategory =
   | 'roof'
   | 'siding'
   | 'openings'
-  | 'fasteners';
+  | 'fasteners'
+  | 'trim';

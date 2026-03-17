@@ -58,6 +58,16 @@ export function generateInstructions(design: ShedDesign): BuildStep[] {
     materials: ['16d framing nails', 'Temporary braces'],
   });
 
+  // Gable end framing step (for gable and gambrel roofs)
+  if (design.roof.style === 'gable' || design.roof.style === 'gambrel') {
+    steps.push({
+      stepNumber: step++,
+      title: 'Frame the Gable Ends',
+      description: `Build triangular stud walls above the double top plate on the two ${design.width}' walls (front and back). Install vertical gable studs at ${design.framing.studSpacing}" on center, cut to increasing heights to match the ${design.roof.pitch}/12 roof pitch. Angle-cut the top of each stud to sit flush against the underside of the rafters. These studs provide nailing surface for the gable siding and close off the roof peak.`,
+      materials: ['Gable studs', '16d framing nails'],
+    });
+  }
+
   // 4. Roof
   steps.push({
     stepNumber: step++,
@@ -135,7 +145,7 @@ function getRoofFramingInstructions(design: ShedDesign): string {
 
   switch (design.roof.style) {
     case 'gable':
-      return `Install the ridge board at the peak, supported by temporary posts. Cut common rafters with a ${pitch}/12 pitch — set your miter saw to ${plumbDeg}° from square for the plumb (ridge) cut at the top. ${birdsMouthNote}${tailNote} Install rafters at ${design.framing.rafterSpacing}" on center, working from one end to the other. Attach with hurricane ties at the wall plate. See the cut list for exact angles.`;
+      return `Install the ridge board at the peak, supported by temporary posts. Cut common rafters with a ${pitch}/12 pitch — set your miter saw to ${plumbDeg}° from square for the plumb (ridge) cut at the top. ${birdsMouthNote}${tailNote} Install rafters at ${design.framing.rafterSpacing}" on center, working from one end to the other. Attach with hurricane ties at the wall plate.${overhang > 0 ? ` Install outrigger blocks (lookouts) from the first interior rafter past each gable wall to support the ${overhang}" rake overhang. Space lookouts every 24" along the rake and nail through the gable-end rafter into each block.` : ''} See the cut list for exact angles.`;
     case 'lean-to':
       return `The front wall is higher than the back wall by ${((design.width * pitch) / 12).toFixed(1)}'. Cut each rafter with a ${plumbDeg}° plumb cut at the high end. ${birdsMouthNote}${tailNote} Install rafters from the high wall to the low wall at ${design.framing.rafterSpacing}" on center with ${overhang}" overhang. Attach with hurricane ties.`;
     case 'gambrel': {

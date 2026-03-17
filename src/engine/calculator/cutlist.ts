@@ -480,6 +480,51 @@ export function generateCutList(design: ShedDesign): CutItem[] {
     }
   }
 
+  // Gable end studs (triangular framing above top plate)
+  if (roof.style === 'gable' || roof.style === 'gambrel') {
+    const gableWidthInches = width * 12;
+    const spacing = framing.studSpacing;
+    for (let x = spacing; x < gableWidthInches; x += spacing) {
+      const dist = Math.min(x, gableWidthInches - x);
+      let studHeight: number;
+      if (roof.style === 'gable') {
+        studHeight = dist * (roof.pitch / 12);
+      } else {
+        const halfSpan = gableWidthInches / 2;
+        const rise = halfSpan * (roof.pitch / 12) * 1.5;
+        studHeight = (dist / halfSpan) * rise;
+      }
+      if (studHeight >= 6) {
+        cuts.push({
+          phase: 'walls',
+          lumberSize: framing.studSize,
+          stockLength: standardLength(Math.ceil(studHeight / 12)),
+          cutLengthInches: Math.round(studHeight * 16) / 16, // round to 1/16
+          qty: 2, // one per gable end
+          label: `Gable stud at ${formatInches(x)} from edge – ${formatInches(studHeight)}, top cut at ${roof.pitch}/12 pitch`,
+        });
+      }
+    }
+  }
+
+  // Outriggers / lookouts (support rake overhang on gable ends)
+  if ((roof.style === 'gable' || roof.style === 'gambrel') && roof.overhang > 0) {
+    const outriggerLenInches = roof.overhang + 16; // overhang + bearing
+    const rafterLen = roof.style === 'gable'
+      ? (width / 2 * 12 + roof.overhang) * Math.sqrt(1 + (roof.pitch / 12) ** 2)
+      : width / 2 * 12; // approximate for gambrel
+    const outriggersPerRake = Math.ceil(rafterLen / 24);
+    const totalOutriggers = outriggersPerRake * 4;
+    cuts.push({
+      phase: 'roof',
+      lumberSize: framing.rafterSize,
+      stockLength: standardLength(Math.ceil(outriggerLenInches / 12)),
+      cutLengthInches: outriggerLenInches,
+      qty: totalOutriggers,
+      label: `Outrigger/lookout – ${formatInches(outriggerLenInches)} (supports rake overhang)`,
+    });
+  }
+
   // Fascia boards
   pushContinuousMember(cuts, 'trim', '1x6', length * 12, 'Fascia board (eave)', 2);
 

@@ -117,38 +117,79 @@ export function calculateFraming(design: ShedDesign): MaterialItem[] {
   }
 
   // Top plates (double) and bottom plate (single) for each wall
+  // Group plates by stock length so short walls use appropriately sized lumber
   const totalPlateLength = 2 * (width + length); // perimeter
   const platePiecesPerRun = (wallLen: number) => Math.ceil(wallLen / 16); // 16ft max lumber
-  let totalPlatePieces = 0;
+
+  // Collect plate groups keyed by stock length
+  const plateGroups: Record<number, { bottom: number; top: number }> = {};
   for (const wall of walls) {
-    totalPlatePieces += platePiecesPerRun(wallLength(design, wall));
+    const wLen = wallLength(design, wall);
+    const stdLen = standardLength(wLen);
+    if (!plateGroups[stdLen]) plateGroups[stdLen] = { bottom: 0, top: 0 };
+    const pieces = platePiecesPerRun(wLen);
+    plateGroups[stdLen].bottom += pieces;
+    plateGroups[stdLen].top += pieces * 2;
   }
-  const singlePlateCount = totalPlatePieces;
-  const doublePlateCount = totalPlatePieces * 2;
-  // Use longest wall to determine plate lumber length
-  const maxWall = Math.max(width, length);
-  const plateStdLen = standardLength(maxWall);
-  const platePrice = lumberPrice(studSize, maxWall);
 
-  items.push({
-    name: `${studSize}x${plateStdLen} Bottom Plate`,
-    description: `Single bottom plate, ${Math.round(totalPlateLength)}' perimeter`,
-    quantity: singlePlateCount,
-    unit: 'piece',
-    unitPrice: platePrice,
-    totalPrice: singlePlateCount * platePrice,
-    category: 'walls',
-  });
+  for (const [stdLenStr, counts] of Object.entries(plateGroups)) {
+    const stdLen = Number(stdLenStr);
+    const price = lumberPrice(studSize, stdLen);
+    items.push({
+      name: `${studSize}x${stdLen} Bottom Plate`,
+      description: `Single bottom plate, ${Math.round(totalPlateLength)}' perimeter`,
+      quantity: counts.bottom,
+      unit: 'piece',
+      unitPrice: price,
+      totalPrice: counts.bottom * price,
+      category: 'walls',
+    });
+    items.push({
+      name: `${studSize}x${stdLen} Top Plate`,
+      description: `Double top plate, ${Math.round(totalPlateLength)}' perimeter`,
+      quantity: counts.top,
+      unit: 'piece',
+      unitPrice: price,
+      totalPrice: counts.top * price,
+      category: 'walls',
+    });
+  }
 
-  items.push({
-    name: `${studSize}x${plateStdLen} Top Plate`,
-    description: `Double top plate, ${Math.round(totalPlateLength)}' perimeter`,
-    quantity: doublePlateCount,
-    unit: 'piece',
-    unitPrice: platePrice,
-    totalPrice: doublePlateCount * platePrice,
-    category: 'walls',
-  });
+  // Gable end framing (triangular stud wall above top plate on front/back walls)
+  if (design.roof.style === 'gable' || design.roof.style === 'gambrel') {
+    const gableWidthInches = width * 12;
+    const spacing = framing.studSpacing;
+    let gableStudCount = 0;
+    const minHeight = 6; // inches — minimum useful gable stud
+
+    for (let x = spacing; x < gableWidthInches; x += spacing) {
+      const dist = Math.min(x, gableWidthInches - x);
+      let height: number;
+      if (design.roof.style === 'gable') {
+        height = dist * (design.roof.pitch / 12);
+      } else {
+        // Gambrel: approximate linear rise to peak
+        const halfSpan = gableWidthInches / 2;
+        const rise = halfSpan * (design.roof.pitch / 12) * 1.5; // gambrel rises ~1.5× gable
+        height = (dist / halfSpan) * rise;
+      }
+      if (height >= minHeight) gableStudCount++;
+    }
+    gableStudCount *= 2; // front and back gable ends
+
+    if (gableStudCount > 0) {
+      const gableStudPrice = lumberPrice(studSize, studLengthFt);
+      items.push({
+        name: `${studSize}x${studStdLen} Gable Stud`,
+        description: `Gable end framing at ${spacing}" O.C. (2 gable ends), cut to pitch`,
+        quantity: gableStudCount,
+        unit: 'piece',
+        unitPrice: gableStudPrice,
+        totalPrice: gableStudCount * gableStudPrice,
+        category: 'walls',
+      });
+    }
+  }
 
   return items;
 }
