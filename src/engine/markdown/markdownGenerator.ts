@@ -13,6 +13,7 @@ const CATEGORY_LABELS: Record<MaterialCategory, string> = {
   siding: 'Siding',
   openings: 'Doors & Windows',
   fasteners: 'Fasteners & Hardware',
+  trim: 'Trim',
 };
 
 const PHASE_LABELS: Record<string, string> = {

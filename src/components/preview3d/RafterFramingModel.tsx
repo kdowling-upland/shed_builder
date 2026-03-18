@@ -152,8 +152,6 @@ export function RafterFramingModel({ widthFt, lengthFt, wallHeight, roof, framin
           if (z < ridgeFrontZ) {
             // Front hip region: rafters get shorter toward z=0
             const frac = z / ridgeFrontZ;
-            const ridgeX = halfW;
-            const ridgeY = peak;
             // Rafter meets the hip line, not the full ridge
             const hipY = h + rise * frac;
             const localRise = hipY - h;

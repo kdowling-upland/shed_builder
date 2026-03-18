@@ -6,7 +6,7 @@ interface MaterialsListProps {
 }
 
 const CATEGORY_ORDER: MaterialCategory[] = [
-  'foundation', 'floor', 'walls', 'roof', 'siding', 'openings', 'fasteners',
+  'foundation', 'floor', 'walls', 'roof', 'siding', 'openings', 'fasteners', 'trim',
 ];
 
 const CATEGORY_LABELS: Record<MaterialCategory, string> = {
@@ -17,6 +17,7 @@ const CATEGORY_LABELS: Record<MaterialCategory, string> = {
   siding: 'Siding',
   openings: 'Doors & Windows',
   fasteners: 'Fasteners & Hardware',
+  trim: 'Trim',
 };
 
 export function MaterialsList({ materials }: MaterialsListProps) {

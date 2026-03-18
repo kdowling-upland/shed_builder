@@ -14,6 +14,7 @@ const CATEGORY_LABELS: Record<MaterialCategory, string> = {
   siding: 'Siding',
   openings: 'Doors & Windows',
   fasteners: 'Fasteners & Hardware',
+  trim: 'Trim',
 };
 
 export function CostSummary({ materials, totalCost }: CostSummaryProps) {
