@@ -141,7 +141,6 @@ export function RafterFramingModel({ widthFt, lengthFt, wallHeight, roof, framin
       case 'hip': {
         const halfW = widthFt / 2;
         const rise = (halfW * roof.pitch) / 12;
-        const peak = h + rise;
         const slopeLen = Math.sqrt(halfW * halfW + rise * rise);
         const angle = Math.atan2(rise, halfW);
         const ridgeFrontZ = halfW;
